@@ -76,121 +76,56 @@ mainForm.addEventListener("submit", signIn);
 const provider = new GoogleAuthProvider();
 document.getElementById("google-login").addEventListener("click", () => {
   signInWithPopup(auth, provider)
-    .then((result) => {
-      // This gives you a Google Access Token. You can use it to access the Google API.
+    .then(async (result) => {
+      // Extract user info from the result
+      const user = result.user;
       const credential = GoogleAuthProvider.credentialFromResult(result);
       const token = credential.accessToken;
-      // The signed-in user info.
-      const user = result.user;
-      console.log(user);
-      if (!localStorage.getItem("userData")) {
-        localStorage.setItem(
-          "userData",
-          JSON.stringify({
-            email: user.email,
-            userName: user.displayName,
-          })
-        );
+
+      // Check if the user exists in the database
+      const userRef = ref(db, "Users/" + user.uid);
+      const snapshot = await get(userRef);
+
+      if (snapshot.exists()) {
+        // If user exists, proceed with the login process
+        console.log("User exists:", user);
+
+        // Store user data in localStorage
+        if (!localStorage.getItem("userData")) {
+          localStorage.setItem(
+            "userData",
+            JSON.stringify({
+              email: user.email,
+              userName: user.displayName,
+            })
+          );
+        }
+
+        // Redirect to home page
+        window.location.replace("../home/home.html");
+      } else {
+        // If user doesn't exist, show an error and prevent login
+        console.log("User does not exist in the database.");
+        alert("You are not registered. Please contact support or sign up.");
+        // Optionally, you can sign the user out here
+        signOut(auth);
       }
-      window.location.replace("../home/home.html");
-      // ...
     })
     .catch((error) => {
-      // Handle Errors here.
+      // Handle Errors here
       const errorCode = error.code;
       const errorMessage = error.message;
-      console.log(error);
+      console.error("Error:", errorMessage);
+
       // The email of the user's account used.
-      const email = error.customData.email;
-      console.log(email);
-      // The AuthCredential type that was used.
-      const credential = GoogleAuthProvider.credentialFromError(error);
-      // ...
+      const email = error.customData?.email;
+      console.error("Associated email:", email);
+
+      // Handle specific error codes
+      if (errorCode === "auth/popup-closed-by-user") {
+        alert("Popup closed before completing the sign-in process.");
+      } else {
+        alert("Error during sign-in: " + errorMessage);
+      }
     });
 });
-
-// import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
-// import {
-//   getAuth,
-//   createUserWithEmailAndPassword,
-//   signInWithEmailAndPassword,
-//   signInWithPopup,
-//   GoogleAuthProvider,
-// } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
-// import {
-//   onValue,
-//   getDatabase,
-//   ref,
-//   child,
-//   set,
-//   get,
-// } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
-// // TODO: Add SDKs for Firebase products that you want to use
-// // https://firebase.google.com/docs/web/setup#available-libraries
-
-// // Your web app's Firebase configuration
-// const firebaseConfig = {
-//   apiKey: "AIzaSyDfgK34boUe0T77KFpteYvMRCYJ-aXOjqc",
-//   authDomain: "verysimpleuserform.firebaseapp.com",
-//   projectId: "verysimpleuserform",
-//   storageBucket: "verysimpleuserform.firebasestorage.app",
-//   messagingSenderId: "712556880799",
-//   appId: "1:712556880799:web:c9ae8ce0632ae17b68d3aa",
-// };
-
-// const app = initializeApp(firebaseConfig);
-// const db = getDatabase();
-// const auth = getAuth(app);
-
-// let emailInp = document.querySelector("#emailInp");
-// let passwordInp = document.querySelector("#passwordInp");
-// let mainForm = document.querySelector("#mainForm");
-
-// let signIn = async (event) => {
-//   event.preventDefault();
-//   signInWithEmailAndPassword(auth, emailInp.value, passwordInp.value)
-//     .then((credentials) => {
-//       //   set(ref());
-//       alert("comrect pasword!");
-//       let uid = credentials.user.uid;
-//       console.log(credentials);
-//       // ----------------------------------------------------------------------
-//       //this for the info for the data from the
-//       const dbref = ref(db);
-//       get(child(dbref, "Users/" + uid)).then((snapShot) => {
-//         console.log(snapShot.val());
-//         if (snapShot.exists()) {
-//           var fname = snapShot.val().firstName;
-//           var lname = snapShot.val().lastName;
-//           console.log(fname + lname);
-//         }
-//       });
-//       // ----------------------------------------------------------------------
-
-//       if (!localStorage.getItem("userData")) {
-//         localStorage.setItem(
-//           "userData",
-//           JSON.stringify({
-//             email: emailInp.value,
-//             userName: `${firstName} ${lastName}`,
-//           })
-//         );
-//       }
-//       // --------------------------------------------------------------------------------
-//     })
-//     .catch((error) => {
-//       console.log(error.code);
-//       console.log(error.message);
-//     });
-// };
-// mainForm.addEventListener("submit", signIn);
-
-// // const dbRef = ref(db, "Users");
-// // onValue(dbRef, (snapshot) => {
-// //   const data = snapshot.val();
-
-// //   // Process the retrieved data here
-// //   console.log(data);
-
-// //   // Update UI, etc.
-// // });

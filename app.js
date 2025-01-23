@@ -47,11 +47,6 @@ let registerData = async (event) => {
     const firebaseUser = credentials.user;
     const { uid } = firebaseUser;
 
-    console.log("UID:", uid);
-    console.log("First Name:", fnameInp.value);
-    console.log("Last Name:", lnameInp.value);
-    console.log("Email:", emailInp.value);
-
     await set(ref(db, "Users/" + uid), {
       id: uid,
       firstName: fnameInp.value,
@@ -84,18 +79,39 @@ let registerData = async (event) => {
 };
 
 mainForm.addEventListener("submit", registerData);
-
 const provider = new GoogleAuthProvider();
+
 document.getElementById("google-login").addEventListener("click", async () => {
   try {
+    // Perform Google Sign-In
     const result = await signInWithPopup(auth, provider);
+    const user = result.user;
 
+    // Extract token and user info
     const credential = GoogleAuthProvider.credentialFromResult(result);
     const token = credential.accessToken;
 
-    const user = result.user;
-    console.log(user);
+    // Log the user details to the console
+    console.log("User Info:", user);
+    console.log("Token:", token);
 
+    // Check if the user already exists in the database (optional)
+    const userRef = ref(db, "Users/" + user.uid);
+    const snapshot = await get(userRef);
+
+    if (!snapshot.exists()) {
+      // If user doesn't exist in the database, create the user
+      await set(userRef, {
+        id: user.uid,
+        firstName: user.displayName,
+        email: user.email,
+      });
+      console.log("User data stored successfully.");
+    } else {
+      console.log("User already exists in the database.");
+    }
+
+    // Store user data in localStorage for future use
     if (!localStorage.getItem("userData")) {
       localStorage.setItem(
         "userData",
@@ -105,10 +121,23 @@ document.getElementById("google-login").addEventListener("click", async () => {
         })
       );
     }
+
+    // Redirect user to the home page
     window.location.replace("./home/home.html");
   } catch (error) {
+    // Handle errors that occur during Google sign-in
     console.error("Error during Google Sign-In:", error);
+    const errorCode = error.code;
+    const errorMessage = error.message;
     const email = error.customData?.email || "Unknown email";
+
+    // Provide more detailed error messages
+    if (errorCode === "auth/popup-closed-by-user") {
+      alert("Popup closed before completing the sign-in process.");
+    } else {
+      alert(`Error during sign-in: ${errorMessage}`);
+    }
+
     console.error("Associated email:", email);
   }
 });
