@@ -1,0 +1,34 @@
+body{
+    margin: 0px;
+    padding: 0px;
+    display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      gap: 20px;
+      text-align: center;
+      background-image: url(../pics/cover3.jpg);
+}
+#mainDiv{
+    border: 2px solid rgb(255, 255, 255);
+    padding: 10px;
+    border-radius: 10px;
+    border-bottom: 10px solid #0B5ED7;
+}
+h1{
+    color: white;
+}
+/* query here */
+@media (max-width: 522px) {
+    #mainDiv{
+        padding: 5px;
+    }
+    h1{
+        font-size: 25px;
+    }
+  }
+  @media (max-width: 428px) {
+    h1{
+        font-size: 20px;
+    }
+  }

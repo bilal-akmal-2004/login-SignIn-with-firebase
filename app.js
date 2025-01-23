@@ -35,80 +35,80 @@ let fnameInp = document.querySelector("#fnameInp");
 let lnameInp = document.querySelector("#lnameInp");
 let mainForm = document.querySelector("#mainForm");
 
-let registerData = (event) => {
+let registerData = async (event) => {
   event.preventDefault();
-  createUserWithEmailAndPassword(auth, emailInp.value, passwordInp.value)
-    .then((credentials) => {
-      const firebaseUser = credentials.user;
-      const { uid } = firebaseUser;
 
-      set(ref(db, `Users/${uid}`), {
-        id: uid,
-        firstName: fnameInp.value,
-        lastName: lnameInp.value,
-        email: emailInp.value,
-      });
-      console.log("Data stored succesfully.");
-      console.log(credentials);
-      alert("Data stored succesfully.");
+  try {
+    const credentials = await createUserWithEmailAndPassword(
+      auth,
+      emailInp.value,
+      passwordInp.value
+    );
+    const firebaseUser = credentials.user;
+    const { uid } = firebaseUser;
 
-      //her we are doing the local storage code
-      if (!localStorage.getItem("userData")) {
-        localStorage.setItem(
-          "userData",
-          JSON.stringify({
-            email: emailInp.value,
-            userName: `${fnameInp.value} ${lnameInp.value}`,
-          })
-        );
-      }
-      window.location.replace("./home/home.html");
-    })
-    .catch((error) => {
-      if (error.code === `auth/email-already-in-use`) {
-        alert("Email already exits.");
-      }
-      if (error.code === `auth/weak-password`) {
-        alert("Password should be 6 letter long.");
-      }
-      console.log(error.code);
-      console.log(error.message);
+    console.log("UID:", uid);
+    console.log("First Name:", fnameInp.value);
+    console.log("Last Name:", lnameInp.value);
+    console.log("Email:", emailInp.value);
+
+    await set(ref(db, "Users/" + uid), {
+      id: uid,
+      firstName: fnameInp.value,
+      lastName: lnameInp.value,
+      email: emailInp.value,
     });
+
+    console.log("Data written successfully!");
+    alert("Data stored successfully.");
+
+    // Optional: Local storage and redirection
+    if (!localStorage.getItem("userData")) {
+      localStorage.setItem(
+        "userData",
+        JSON.stringify({
+          email: emailInp.value,
+          userName: `${fnameInp.value} ${lnameInp.value}`,
+        })
+      );
+    }
+    window.location.replace("./home/home.html");
+  } catch (error) {
+    if (error.code === `auth/email-already-in-use`) {
+      alert("Email already exists.");
+    } else if (error.code === `auth/weak-password`) {
+      alert("Password should be at least 6 characters long.");
+    }
+    console.error("Error:", error.code, error.message);
+  }
 };
+
 mainForm.addEventListener("submit", registerData);
 
 const provider = new GoogleAuthProvider();
-document.getElementById("google-login").addEventListener("click", () => {
-  signInWithPopup(auth, provider)
-    .then((result) => {
-      // This gives you a Google Access Token. You can use it to access the Google API.
-      const credential = GoogleAuthProvider.credentialFromResult(result);
-      const token = credential.accessToken;
-      // The signed-in user info.
-      const user = result.user;
-      console.log(user);
-      if (!localStorage.getItem("userData")) {
-        localStorage.setItem(
-          "userData",
-          JSON.stringify({
-            email: user.email,
-            userName: user.displayName,
-          })
-        );
-      }
-      window.location.replace("./home/home.html");
-      // ...
-    })
-    .catch((error) => {
-      // Handle Errors here.
-      const errorCode = error.code;
-      const errorMessage = error.message;
-      console.log(error);
-      // The email of the user's account used.
-      const email = error.customData.email;
-      console.log(email);
-      // The AuthCredential type that was used.
-      const credential = GoogleAuthProvider.credentialFromError(error);
-      // ...
-    });
+document.getElementById("google-login").addEventListener("click", async () => {
+  try {
+    const result = await signInWithPopup(auth, provider);
+
+    const credential = GoogleAuthProvider.credentialFromResult(result);
+    const token = credential.accessToken;
+
+    const user = result.user;
+    console.log(user);
+
+    if (!localStorage.getItem("userData")) {
+      localStorage.setItem(
+        "userData",
+        JSON.stringify({
+          email: user.email,
+          userName: user.displayName,
+        })
+      );
+    }
+    window.location.replace("./home/home.html");
+  } catch (error) {
+    console.error("Error during Google Sign-In:", error);
+    const email = error.customData?.email || "Unknown email";
+    console.error("Associated email:", email);
+  }
 });

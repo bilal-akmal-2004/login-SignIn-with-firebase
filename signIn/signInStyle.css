@@ -1,0 +1,41 @@
+body{
+    margin: 0px;
+    padding: 0px;
+    display: flex;
+      height: 100vh;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      background-image: url(../pics/cover2.jpg);
+}
+form{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    border: 2px solid rgb(255, 255, 255);
+        border-radius: 10px;
+        padding: 10px;
+        border-bottom: 20px solid #0b5ed7;
+        width: 30%;
+}
+/* query her  */
+@media (max-width: 1216px) {
+  form{
+      width: 40%;
+  }
+}
+@media (max-width: 898px) {
+  form{
+      width: 60%;
+  }
+}
+@media (max-width: 876px) {
+    form{
+        width: 70%;
+    }
+  }
+  @media (max-width: 462px) {
+    form{
+        width: 90%;
+    }
+  }

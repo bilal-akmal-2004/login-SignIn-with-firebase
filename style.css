@@ -1,0 +1,31 @@
+body{
+ margin: 0px;
+ padding: 0px;
+ text-align: center;
+ display: flex;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+    background-image: url(pics/cover.jpg);
+}
+form{
+    border: 2px solid rgb(255, 255, 255);
+    border-radius: 10px;
+    padding: 10px;
+    border-bottom: 20px solid #0b5ed7;
+    display: flex;
+    gap: 10px;
+    flex-direction: column;
+    width: 50%;
+}
+/* query her  */
+@media (max-width: 876px) {
+    form{
+        width: 70%;
+    }
+  }
+  @media (max-width: 462px) {
+    form{
+        width: 90%;
+    }
+  }
