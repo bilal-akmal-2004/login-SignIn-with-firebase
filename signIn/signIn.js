@@ -29,6 +29,50 @@ let emailInp = document.querySelector("#emailInp");
 let passwordInp = document.querySelector("#passwordInp");
 let mainForm = document.querySelector("#mainForm");
 
+//validation
+let validateInput = (event) => {
+  const input = event.target;
+  let errorMessage = "";
+
+  // Get the existing span (if any) for the current input
+  let span = input.nextElementSibling;
+
+  // Validate email
+  if (input === emailInp) {
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(input.value)) {
+      errorMessage = "Please enter a valid email address.";
+    }
+  }
+
+  // Validate password
+  if (input === passwordInp) {
+    if (input.value.length < 6) {
+      errorMessage = "Password must be at least 6 characters long.";
+    }
+  }
+
+  // If there's an error message, add it if the span doesn't already exist
+  if (errorMessage) {
+    if (!span || !span.classList.contains("error")) {
+      if (span) span.remove(); // Remove any existing error message
+      span = document.createElement("span");
+      span.classList.add("error");
+      span.textContent = errorMessage;
+      input.parentNode.appendChild(span); // Append the error span below the input
+    }
+  } else {
+    // If the input is valid, remove the error message
+    if (span && span.classList.contains("error")) {
+      span.remove();
+    }
+  }
+};
+
+// Attach the validation to each input field
+emailInp.addEventListener("input", validateInput);
+passwordInp.addEventListener("input", validateInput);
+
 async function signIn(event) {
   event.preventDefault();
 

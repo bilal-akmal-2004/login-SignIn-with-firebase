@@ -13,10 +13,24 @@ form{
     flex-direction: column;
     gap: 10px;
     border: 2px solid rgb(255, 255, 255);
-        border-radius: 10px;
-        padding: 10px;
-        border-bottom: 20px solid #0b5ed7;
-        width: 30%;
+    border-radius: 10px;
+    padding: 10px;
+    border-bottom: 20px solid #0b5ed7;
+    width: 30%;
+transition: all 0.5s ease;
+}
+form:hover{
+  box-shadow: 0px 8px 20px rgba(0, 58, 203, 0.3);
+  background-color: rgba(10, 12, 42, 0.1); /* 50% transparent black */
+  border-radius: 55px;
+
+  transform: scale(1.07);
+}
+span{
+  font-size: 20px;
+  color: rgb(255, 255, 255);
+  text-decoration: underline;
+  text-decoration-color: rgb(227, 95, 95)
 }
 /* query her  */
 @media (max-width: 1216px) {

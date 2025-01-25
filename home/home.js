@@ -28,7 +28,8 @@ let userData = JSON.parse(localStorage.getItem("userData"));
 // Check if user data exists
 if (userData) {
   console.log(userData);
-  message.innerText = `Name: ${userData.userName}
+  message.innerText = `Welcome !
+  Name: ${userData.userName}
   Email: ${userData.email}
   `;
 } else {
