@@ -34,7 +34,21 @@ let passwordInp = document.querySelector("#passwordInp");
 let fnameInp = document.querySelector("#fnameInp");
 let lnameInp = document.querySelector("#lnameInp");
 let mainForm = document.querySelector("#mainForm");
-//--------------------------------------------------------------------------------------------------
+let selectBox = document.querySelector("#selectBox");
+let inlineRadio1 = document.querySelector("#inlineRadio1");
+let inlineRadio2 = document.querySelector("#inlineRadio2");
+///loading spinner valraible and its functiaons
+let loadingSpinner = document.getElementById("loading-spinner");
+
+function showLoadingSpinner() {
+  loadingSpinner.style.display = "flex";
+}
+
+function hideLoadingSpinner() {
+  loadingSpinner.style.display = "none";
+}
+
+//-----------c---------------------------------------------------------------------------------------
 
 let validateInput = (event) => {
   const input = event.target;
@@ -47,7 +61,7 @@ let validateInput = (event) => {
   if (input === emailInp) {
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailPattern.test(input.value)) {
-      errorMessage = "Please enter a valid email address.";
+      errorMessage = "Invalid email address.";
     }
   }
 
@@ -100,7 +114,27 @@ lnameInp.addEventListener("input", validateInput);
 let registerData = async (event) => {
   event.preventDefault();
 
+  if (
+    !emailInp.value ||
+    !passwordInp.value ||
+    !fnameInp.value ||
+    !lnameInp.value ||
+    selectBox.value === "Select the section" || // Ensures a valid selection
+    (!inlineRadio1.checked && !inlineRadio2.checked) // Ensures at least one radio is selected
+  ) {
+    alert("Make sure to fill all the fields.");
+    return;
+  }
+
+  const radioValue = () => {
+    if (inlineRadio1.checked) {
+      return inlineRadio1.value;
+    }
+    return inlineRadio2.value;
+  };
+
   try {
+    showLoadingSpinner();
     const credentials = await createUserWithEmailAndPassword(
       auth,
       emailInp.value,
@@ -114,6 +148,8 @@ let registerData = async (event) => {
       firstName: fnameInp.value,
       lastName: lnameInp.value,
       email: emailInp.value,
+      section: selectBox.value,
+      gender: radioValue(),
     });
 
     console.log("Data written successfully!");
@@ -126,6 +162,8 @@ let registerData = async (event) => {
         JSON.stringify({
           email: emailInp.value,
           userName: `${fnameInp.value} ${lnameInp.value}`,
+          section: selectBox.value,
+          gender: radioValue(),
         })
       );
     }
@@ -137,6 +175,8 @@ let registerData = async (event) => {
       alert("Password should be at least 6 characters long.");
     }
     console.error("Error:", error.code, error.message);
+  } finally {
+    hideLoadingSpinner();
   }
 };
 
@@ -145,6 +185,7 @@ const provider = new GoogleAuthProvider();
 
 document.getElementById("google-login").addEventListener("click", async () => {
   try {
+    showLoadingSpinner();
     // Perform Google Sign-In
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
@@ -201,5 +242,7 @@ document.getElementById("google-login").addEventListener("click", async () => {
     }
 
     console.error("Associated email:", email);
+  } finally {
+    hideLoadingSpinner();
   }
 });

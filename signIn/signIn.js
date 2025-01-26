@@ -28,6 +28,16 @@ const auth = getAuth(app);
 let emailInp = document.querySelector("#emailInp");
 let passwordInp = document.querySelector("#passwordInp");
 let mainForm = document.querySelector("#mainForm");
+///for loading spinning
+let loadingSpinner = document.querySelector("#loading-spinner");
+
+function showLoadingSpinner() {
+  loadingSpinner.style.display = "flex";
+}
+
+function hideLoadingSpinner() {
+  loadingSpinner.style.display = "none";
+}
 
 //validation
 let validateInput = (event) => {
@@ -75,8 +85,13 @@ passwordInp.addEventListener("input", validateInput);
 
 async function signIn(event) {
   event.preventDefault();
+  if (!emailInp.value || !passwordInp.value) {
+    alert("Make sure to fill all the fields.");
+    return;
+  }
 
   try {
+    showLoadingSpinner();
     const credentials = await signInWithEmailAndPassword(
       auth,
       emailInp.value,
@@ -94,6 +109,8 @@ async function signIn(event) {
       const userData = snapshot.val();
       const firstName = userData.firstName;
       const lastName = userData.lastName;
+      const section = userData.section;
+      const gender = userData.gender;
       console.log(firstName + lastName);
 
       // Use userData (firstName, lastName) here
@@ -103,6 +120,8 @@ async function signIn(event) {
           JSON.stringify({
             email: emailInp.value,
             userName: `${firstName} ${lastName}`,
+            section: section,
+            gender: gender,
           })
         );
         window.location.replace("../home/home.html");
@@ -111,65 +130,76 @@ async function signIn(event) {
       console.log("No data found for user with UID:", uid);
     }
   } catch (error) {
-    console.error("Sign-in error:", error.code, error.message);
+    if (error.code === "auth/invalid-credential") {
+      alert("This email is not registered!");
+    }
+    console.error("Sign-in error code:", error.code);
+    console.error("Sign-in error message:", error.message);
+  } finally {
+    hideLoadingSpinner();
   }
 }
 
 mainForm.addEventListener("submit", signIn);
 
 const provider = new GoogleAuthProvider();
-document.getElementById("google-login").addEventListener("click", () => {
-  signInWithPopup(auth, provider)
-    .then(async (result) => {
-      // Extract user info from the result
-      const user = result.user;
-      const credential = GoogleAuthProvider.credentialFromResult(result);
-      const token = credential.accessToken;
+document.getElementById("google-login").addEventListener("click", async () => {
+  try {
+    // Show a loading spinner (optional)
+    showLoadingSpinner();
 
-      // Check if the user exists in the database
-      const userRef = ref(db, "Users/" + user.uid);
-      const snapshot = await get(userRef);
+    // Perform sign-in with popup
+    const result = await signInWithPopup(auth, provider);
 
-      if (snapshot.exists()) {
-        // If user exists, proceed with the login process
-        console.log("User exists:", user);
+    // Extract user info from the result
+    const user = result.user;
+    const credential = GoogleAuthProvider.credentialFromResult(result);
+    const token = credential.accessToken;
 
-        // Store user data in localStorage
-        if (!localStorage.getItem("userData")) {
-          localStorage.setItem(
-            "userData",
-            JSON.stringify({
-              email: user.email,
-              userName: user.displayName,
-            })
-          );
-        }
+    // Check if the user exists in the database
+    const userRef = ref(db, "Users/" + user.uid);
+    const snapshot = await get(userRef);
 
-        // Redirect to home page
-        window.location.replace("../home/home.html");
-      } else {
-        // If user doesn't exist, show an error and prevent login
-        console.log("User does not exist in the database.");
-        alert("You are not registered. Please contact support or sign up.");
-        // Optionally, you can sign the user out here
-        signOut(auth);
+    if (snapshot.exists()) {
+      // If user exists, proceed with the login process
+      console.log("User exists:", user);
+
+      // Store user data in localStorage
+      if (!localStorage.getItem("userData")) {
+        localStorage.setItem(
+          "userData",
+          JSON.stringify({
+            email: user.email,
+            userName: user.displayName,
+          })
+        );
       }
-    })
-    .catch((error) => {
-      // Handle Errors here
-      const errorCode = error.code;
-      const errorMessage = error.message;
-      console.error("Error:", errorMessage);
 
-      // The email of the user's account used.
-      const email = error.customData?.email;
-      console.error("Associated email:", email);
+      // Redirect to the home page
+      window.location.replace("../home/home.html");
+    } else {
+      // If user doesn't exist, show an error and prevent login
+      console.log("User does not exist in the database.");
+      alert("You are not registered. Please contact support or sign up.");
 
-      // Handle specific error codes
-      if (errorCode === "auth/popup-closed-by-user") {
-        alert("Popup closed before completing the sign-in process.");
-      } else {
-        alert("Error during sign-in: " + errorMessage);
-      }
-    });
+      // Sign the user out
+      await signOut(auth);
+    }
+  } catch (error) {
+    console.error("Error:", error.message);
+
+    // Handle errors during sign-in or database check
+    if (error.code === "auth/popup-closed-by-user") {
+      alert("Popup closed before completing the sign-in process.");
+    } else if (error.message.includes("database")) {
+      alert(
+        "An error occurred while verifying your account. Please try again later."
+      );
+    } else {
+      alert("Error during sign-in: " + error.message);
+    }
+  } finally {
+    // Hide the loading spinner (optional)
+    hideLoadingSpinner();
+  }
 });

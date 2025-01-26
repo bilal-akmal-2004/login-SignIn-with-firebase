@@ -21,17 +21,25 @@ const auth = getAuth(app);
 // DOM Elements
 let message = document.querySelector("#message");
 let logOut = document.querySelector("#logOut");
-
 // Get local storage data
 let userData = JSON.parse(localStorage.getItem("userData"));
 
 // Check if user data exists
 if (userData) {
   console.log(userData);
-  message.innerText = `Welcome !
-  Name: ${userData.userName}
-  Email: ${userData.email}
-  `;
+  if (userData.section === undefined) {
+    message.innerText = `Welcome !
+    Name: ${userData.userName}
+    Email: ${userData.email}
+    `;
+  } else {
+    message.innerText = `Welcome !
+    Name: ${userData.userName}
+    Email: ${userData.email}
+    Section: ${userData.section}
+    Gender: ${userData.gender}
+    `;
+  }
 } else {
   window.location.replace("../signIn/sigIn.html");
 }
@@ -39,13 +47,24 @@ if (userData) {
 // Logout functionality
 logOut.addEventListener("click", async () => {
   try {
+    // Show spinner before starting the logout process
+
+    // Perform logout
     await signOut(auth);
-    // Sign-out successful
+
+    // Remove user data from local storage
     localStorage.removeItem("userData");
+
+    // Inform the user of successful logout
     alert("You have been logged out successfully.");
+
+    // Redirect to the sign-in page
     window.location.replace("../signIn/sigIn.html");
   } catch (error) {
+    // Log the error to the console
     console.error("Error during sign-out:", error.message);
+
+    // Notify the user of the issue
     alert("An error occurred during logout. Please try again.");
   }
 });

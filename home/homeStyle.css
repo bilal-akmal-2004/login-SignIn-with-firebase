@@ -25,6 +25,8 @@ body{
 h1{
     color: white;
 }
+
+
 /* query here */
 @media (max-width: 522px) {
     #mainDiv{
