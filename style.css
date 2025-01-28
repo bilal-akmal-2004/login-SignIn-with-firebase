@@ -123,4 +123,7 @@ h3{
     form{
         width: 90%;
     }
+    .modal-content {
+      width: 70%;
+    }
   }

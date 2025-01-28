@@ -118,9 +118,15 @@ span{
     form{
         width: 70%;
     }
+    .modal-content {
+      width: 50%;
+    }
   }
   @media (max-width: 462px) {
     form{
         width: 90%;
+    }
+    .modal-content {
+      width: 80%;
     }
   }
