@@ -24,6 +24,17 @@ let logOut = document.querySelector("#logOut");
 // Get local storage data
 let userData = JSON.parse(localStorage.getItem("userData"));
 
+//-----------------modal funcations----------------
+let showModal = (message) => {
+  document.getElementById("modalMessage").innerText = message;
+  document.getElementById("popupModal").style.display = "flex";
+};
+
+window.closeModal = () => {
+  document.getElementById("popupModal").style.display = "none";
+};
+//-----------------modal funcations ends here above----------------
+
 // Check if user data exists
 if (userData) {
   console.log(userData);
@@ -56,7 +67,7 @@ logOut.addEventListener("click", async () => {
     localStorage.removeItem("userData");
 
     // Inform the user of successful logout
-    alert("You have been logged out successfully.");
+    showModal("You have been logged out successfully.");
 
     // Redirect to the sign-in page
     window.location.replace("../signIn/sigIn.html");
@@ -65,6 +76,6 @@ logOut.addEventListener("click", async () => {
     console.error("Error during sign-out:", error.message);
 
     // Notify the user of the issue
-    alert("An error occurred during logout. Please try again.");
+    showModal("An error occurred during logout. Please try again.");
   }
 });

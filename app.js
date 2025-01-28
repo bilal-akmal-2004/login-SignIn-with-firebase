@@ -48,6 +48,17 @@ function hideLoadingSpinner() {
   loadingSpinner.style.display = "none";
 }
 
+//-----------------modal funcations----------------
+let showModal = (message) => {
+  document.getElementById("modalMessage").innerText = message;
+  document.getElementById("popupModal").style.display = "flex";
+};
+
+window.closeModal = () => {
+  document.getElementById("popupModal").style.display = "none";
+};
+//-----------------modal funcations ends here above----------------
+
 //-----------c---------------------------------------------------------------------------------------
 
 let validateInput = (event) => {
@@ -122,7 +133,7 @@ let registerData = async (event) => {
     selectBox.value === "Select the section" || // Ensures a valid selection
     (!inlineRadio1.checked && !inlineRadio2.checked) // Ensures at least one radio is selected
   ) {
-    alert("Make sure to fill all the fields.");
+    showModal("Make sure to fill all the fields.");
     return;
   }
 
@@ -153,7 +164,7 @@ let registerData = async (event) => {
     });
 
     console.log("Data written successfully!");
-    alert("Data stored successfully.");
+    showModal("Data stored successfully.");
 
     // Optional: Local storage and redirection
     if (!localStorage.getItem("userData")) {
@@ -170,9 +181,9 @@ let registerData = async (event) => {
     window.location.replace("./home/home.html");
   } catch (error) {
     if (error.code === `auth/email-already-in-use`) {
-      alert("Email already exists.");
+      showModal("Email already exists.");
     } else if (error.code === `auth/weak-password`) {
-      alert("Password should be at least 6 characters long.");
+      showModal("Password should be at least 6 characters long.");
     }
     console.error("Error:", error.code, error.message);
   } finally {
@@ -236,9 +247,9 @@ document.getElementById("google-login").addEventListener("click", async () => {
 
     // Provide more detailed error messages
     if (errorCode === "auth/popup-closed-by-user") {
-      alert("Popup closed before completing the sign-in process.");
+      showModal("Popup closed before completing the sign-in process.");
     } else {
-      alert(`Error during sign-in: ${errorMessage}`);
+      showModal(`Error during sign-in: ${errorMessage}`);
     }
 
     console.error("Associated email:", email);

@@ -39,6 +39,17 @@ function hideLoadingSpinner() {
   loadingSpinner.style.display = "none";
 }
 
+//-----------------modal funcations----------------
+let showModal = (message) => {
+  document.getElementById("modalMessage").innerText = message;
+  document.getElementById("popupModal").style.display = "flex";
+};
+
+window.closeModal = () => {
+  document.getElementById("popupModal").style.display = "none";
+};
+//-----------------modal funcations ends here above----------------
+
 //validation
 let validateInput = (event) => {
   const input = event.target;
@@ -86,7 +97,7 @@ passwordInp.addEventListener("input", validateInput);
 async function signIn(event) {
   event.preventDefault();
   if (!emailInp.value || !passwordInp.value) {
-    alert("Make sure to fill all the fields.");
+    showModal("Make sure to fill all the fields.");
     return;
   }
 
@@ -97,7 +108,7 @@ async function signIn(event) {
       emailInp.value,
       passwordInp.value
     );
-    alert("Correct password!");
+    showModal("Correct password!");
     const uid = credentials.user.uid;
     console.log(credentials);
 
@@ -131,7 +142,7 @@ async function signIn(event) {
     }
   } catch (error) {
     if (error.code === "auth/invalid-credential") {
-      alert("This email is not registered!");
+      showModal("This email is not registered!");
     }
     console.error("Sign-in error code:", error.code);
     console.error("Sign-in error message:", error.message);
@@ -180,8 +191,7 @@ document.getElementById("google-login").addEventListener("click", async () => {
     } else {
       // If user doesn't exist, show an error and prevent login
       console.log("User does not exist in the database.");
-      alert("You are not registered. Please contact support or sign up.");
-
+      showModal("You are not registered. Please contact support or sign up.");
       // Sign the user out
       await signOut(auth);
     }
@@ -190,13 +200,12 @@ document.getElementById("google-login").addEventListener("click", async () => {
 
     // Handle errors during sign-in or database check
     if (error.code === "auth/popup-closed-by-user") {
-      alert("Popup closed before completing the sign-in process.");
+      showModal("Popup closed before completing the sign-in process.");
     } else if (error.message.includes("database")) {
-      alert(
-        "An error occurred while verifying your account. Please try again later."
-      );
+      ("An error occurred while verifying your account. Please try again later.");
+      showModal();
     } else {
-      alert("Error during sign-in: " + error.message);
+      showModal(`Error during sign-in: ${error.message}`);
     }
   } finally {
     // Hide the loading spinner (optional)
